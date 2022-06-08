@@ -1,0 +1,8 @@
+setup.py
+svg_card_creator/__init__.py
+svg_card_creator/svg_card_creator.py
+svg_card_creator.egg-info/PKG-INFO
+svg_card_creator.egg-info/SOURCES.txt
+svg_card_creator.egg-info/dependency_links.txt
+svg_card_creator.egg-info/not-zip-safe
+svg_card_creator.egg-info/top_level.txt
