@@ -2,6 +2,7 @@ import os
 import yaml
 import shutil
 import xml.etree.ElementTree as ET
+from io import StringIO
 import subprocess
 
 def hello():
@@ -24,9 +25,12 @@ def createCardsFromFile(yaml_path, destination_path, changeSvg, returnTemplate):
             shutil.copyfile(template_path, filenameSVG)
 
             tree = ET.parse(filenameSVG)
-            root = tree.getroot()
-            for element in root.iter():
-                changeSvg(element, card)
+
+
+            changeSvg(tree, card)
+            #root = tree.getroot()
+            #for element in root.iter():
+            #    changeSvg(element, card)
             tree.write(filenameSVG)
             subprocess.check_output(['inkscape', filenameSVG, '-o', filenamePNG])
         return images
@@ -38,6 +42,7 @@ def createGrid(images, filename):
         if len(images[x:x+10]) <= 0:
             continue
         subprocess.check_output(['convert'] + images[x:x+10]  + ['+append', './tts/grid-' + filename + str(i) + '.png'])
+    subprocess.check_output(['touch'] + ['./tts/' + filename + '-full-grid.png'])
     subprocess.check_output(['rm'] + ['./tts/' + filename + '-full-grid.png'])
     subprocess.check_output(['convert', './tts/*' + filename + '*.png',  '-append', './tts/' + filename + '-full-grid.png'])
     for i in range(len(images) // 10 + 1):
