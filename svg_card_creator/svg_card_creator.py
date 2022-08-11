@@ -27,11 +27,13 @@ def createCardsFromFile(yaml_path, destination_path, changeSvg, returnTemplate):
 
 
             changeSvg(tree, card)
-            #root = tree.getroot()
-            #for element in root.iter():
-            #    changeSvg(element, card)
             tree.write(filenameSVG)
             subprocess.check_output(['inkscape', filenameSVG, '-o', filenamePNG])
+            if "AmountInDeck" in card:
+                for i in range(2, card["AmountInDeck"] + 1):
+                    filenameCopy = filename + "_" + str(i) + ".png"
+                    subprocess.check_output(['cp', filenamePNG, filenameCopy])
+                    images.append(filenameCopy)
         return images
 
 
