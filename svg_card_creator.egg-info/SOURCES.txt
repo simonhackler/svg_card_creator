@@ -1,3 +1,4 @@
+README.md
 setup.py
 svg_card_creator/__init__.py
 svg_card_creator/svg_card_creator.py
