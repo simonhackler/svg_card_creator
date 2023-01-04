@@ -4,9 +4,6 @@ import shutil
 import xml.etree.ElementTree as ET
 import subprocess
 
-def hello():
-    print("hello")
-
 def createCardsFromFile(yaml_path, destination_path, changeSvg, returnTemplate):
     images = []
     yaml_path = os.path.abspath(yaml_path)
