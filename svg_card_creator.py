@@ -22,9 +22,22 @@ def full_card_creation(data_parent_dir, card_model, destination_path, get_templa
     list_of_cards_by_type = []
     for card_type in card_types:
         list_of_cards_by_type.append(list(filter(lambda x: x[0]["CardType"] == card_type, cards_with_images)))
-    for cards_of_type in list_of_cards_by_type:
-        createGrid(list(map(lambda x: x[1], cards_of_type)), cards_of_type[0][0]["CardType"])
+    create_grids(list_of_cards_by_type)
+    create_pdfs(list_of_cards_by_type)
     
+def create_grids(list_of_cards_by_type):
+    check_if_folder_exists_and_create_if_not("./tts")
+    for cards_of_type in list_of_cards_by_type:
+        create_grid(list(map(lambda x: x[1], cards_of_type)), cards_of_type[0][0]["CardType"])
+
+def create_pdfs(list_of_cards_by_type):
+    check_if_folder_exists_and_create_if_not("./pdf")
+    for cards_of_type in list_of_cards_by_type:
+        create_pdf(list(map(lambda x: x[1], cards_of_type)), cards_of_type[0][0]["CardType"])
+
+def create_pdf(images, name):
+    subprocess.check_output(['convert']  + images + ['./pdf/all-' + name + '.pdf'])
+
 
 def create_cards_from_yaml_files(data_parent_dir, card_model, destination_path, get_template_path_from_card):
     check_if_folder_exists_and_create_if_not(folder_path=destination_path+"/cards")
@@ -38,7 +51,6 @@ def create_cards_from_yaml_file(yaml_file, card_model, destination_path, get_tem
     card_data_and_image = []
     with open(yaml_file, 'r') as stream:
         try:
-            #data = yaml.safe_load(stream)
             data = yaml.full_load(stream)
         except yaml.YAMLError as exc:
             print(exc)
@@ -85,36 +97,7 @@ def change_svg_to_data(tree, card, card_model):
                 if element.attrib["id"] == card_id:
                     card_model[card["CardType"]][card_id](element, card)
 
-
-def createCardsFromFile(yaml_path, destination_path, changeSvg, return_template):
-    images = []
-    yaml_path = os.path.abspath(yaml_path)
-    destination_path = os.path.abspath(destination_path)+ "/"
-    with open(yaml_path) as file:
-        yaml_data = yaml.full_load(file)
-        for card in yaml_data:
-            filename =  destination_path + card['Name']
-            filenamePNG = filename + ".png"
-            filenameSVG = filename + ".svg"
-            images.append(filenamePNG)
-
-            template_path = return_template(card)
-            template_path = os.path.abspath(template_path)
-            shutil.copyfile(template_path, filenameSVG)
-
-            tree = ET.parse(filenameSVG)
-
-            changeSvg(tree, card)
-            tree.write(filenameSVG)
-            subprocess.check_output(['inkscape', filenameSVG, '-o', filenamePNG])
-            if "AmountInDeck" in card:
-                for i in range(2, card["AmountInDeck"] + 1):
-                    filenameCopy = filename + "_" + str(i) + ".png"
-                    subprocess.check_output(['cp', filenamePNG, filenameCopy])
-                    images.append(filenameCopy)
-        return images
-
-def createGrid(images, filename):
+def create_grid(images, filename):
     for i in range(len(images) // 10 + 1):
         x = i * 10
         if len(images[x:x+10]) <= 0:

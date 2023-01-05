@@ -1,4 +1,1 @@
-# Installation
-
-In folder: 
-pip install -e ./
+# SVG card creator
