@@ -13,12 +13,25 @@ def get_all_yaml_files_dir_and_subdirs(dir_path):
                 yaml_files_dir_and_subdirs.append(os.path.join(root, file))
     return yaml_files_dir_and_subdirs
 
+def full_card_creation(data_parent_dir, card_model, destination_path, get_template_path_from_card):
+    cards_with_images = create_cards_from_yaml_files(data_parent_dir, card_model, destination_path, get_template_path_from_card)
+    card_types = set()
+    for card in cards_with_images:
+        card_types.add(card[0]["CardType"])
+    print(card_types)
+    list_of_cards_by_type = []
+    for card_type in card_types:
+        list_of_cards_by_type.append(list(filter(lambda x: x[0]["CardType"] == card_type, cards_with_images)))
+    for cards_of_type in list_of_cards_by_type:
+        createGrid(list(map(lambda x: x[1], cards_of_type)), cards_of_type[0][0]["CardType"])
+    
+
 def create_cards_from_yaml_files(data_parent_dir, card_model, destination_path, get_template_path_from_card):
     check_if_folder_exists_and_create_if_not(folder_path=destination_path+"/cards")
     yaml_files_dir_and_subdirs = get_all_yaml_files_dir_and_subdirs(data_parent_dir)
     card_data_and_image = []
     for yaml_file in yaml_files_dir_and_subdirs:
-        card_data_and_image.append(create_cards_from_yaml_file(yaml_file, card_model, destination_path, get_template_path_from_card))
+        card_data_and_image.extend(create_cards_from_yaml_file(yaml_file, card_model, destination_path, get_template_path_from_card))
     return card_data_and_image
 
 def create_cards_from_yaml_file(yaml_file, card_model, destination_path, get_template_path_from_card):
@@ -115,8 +128,3 @@ def createGrid(images, filename):
         if len(images[x:x+10]) <= 0:
             continue
         subprocess.check_output(['rm'] + ['./tts/grid-' + filename + str(i) + '.png'])
-
-def add_svg_text_element_bold(parent, text):
-    element = ET.SubElement(parent, 'text')
-    element.set('style', 'font-weight: bold;')
-    element.text = text
