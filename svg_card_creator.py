@@ -13,8 +13,9 @@ def get_all_yaml_files_dir_and_subdirs(dir_path):
                 yaml_files_dir_and_subdirs.append(os.path.join(root, file))
     return yaml_files_dir_and_subdirs
 
-def full_card_creation(data_parent_dir, card_model, destination_path, get_template_path_from_card):
+def full_card_creation(data_parent_dir, card_model, destination_path, get_template_path_from_card, gen_options):
     cards_with_images = create_cards_from_yaml_files(data_parent_dir, card_model, destination_path, get_template_path_from_card)
+    gen_options = set(gen_options)
     card_types = set()
     for card in cards_with_images:
         card_types.add(card[0]["CardType"])
@@ -22,8 +23,12 @@ def full_card_creation(data_parent_dir, card_model, destination_path, get_templa
     list_of_cards_by_type = []
     for card_type in card_types:
         list_of_cards_by_type.append(list(filter(lambda x: x[0]["CardType"] == card_type, cards_with_images)))
-    create_grids(list_of_cards_by_type)
-    create_pdfs(list_of_cards_by_type)
+    if "-grid" in gen_options:
+        create_grids(list_of_cards_by_type)
+    if "-pdf" in gen_options:
+        create_pdfs(list_of_cards_by_type)
+    if "-paper" in gen_options:
+        creater_paper_prints(list_of_cards_by_type)
     
 def create_grids(list_of_cards_by_type):
     check_if_folder_exists_and_create_if_not("./tts")
@@ -34,6 +39,12 @@ def create_pdfs(list_of_cards_by_type):
     check_if_folder_exists_and_create_if_not("./pdf")
     for cards_of_type in list_of_cards_by_type:
         create_pdf(list(map(lambda x: x[1], cards_of_type)), cards_of_type[0][0]["CardType"])
+
+def creater_paper_prints(list_of_cards_by_type):
+    outputpath = "./paper-print/outputs/"
+    check_if_folder_exists_and_create_if_not(outputpath)
+    for cards_of_type in list_of_cards_by_type:
+        create_paper_print(list(map(lambda x: x[1], cards_of_type)), cards_of_type[0][0]["CardType"], outputpath)
 
 def create_pdf(images, name):
     subprocess.check_output(['convert']  + images + ['./pdf/all-' + name + '.pdf'])
@@ -111,3 +122,49 @@ def create_grid(images, filename):
         if len(images[x:x+10]) <= 0:
             continue
         subprocess.check_output(['rm'] + ['./tts/grid-' + filename + str(i) + '.png'])
+
+def create_paper_print(images, file_name, outputpath):
+    subprocess.check_output(['mkdir', '-p', outputpath])
+    file_name = outputpath + file_name
+    files = []
+    for i in range(0,len(images),9):
+        tree = ET.parse("./paper-print/paper-print-template.svg")
+        root = tree.getroot()
+
+        for element in root.iter():
+            if "id" in element.attrib:
+                if element.attrib["id"] == "card-1" and i < len(images):
+                    element.attrib["{http://www.w3.org/1999/xlink}href"] = images[i]
+                elif element.attrib["id"] == "card-2" and i+1 < len(images):
+                    element.attrib["{http://www.w3.org/1999/xlink}href"] = images[i+1]
+                elif element.attrib["id"] == "card-3" and i+2 < len(images):
+                    element.attrib["{http://www.w3.org/1999/xlink}href"] = images[i+2]
+                elif element.attrib["id"] == "card-4" and i+3 < len(images):
+                    element.attrib["{http://www.w3.org/1999/xlink}href"] = images[i+3]
+                elif element.attrib["id"] == "card-5" and i+4 < len(images):
+                    element.attrib["{http://www.w3.org/1999/xlink}href"] = images[i+4]
+                elif element.attrib["id"] == "card-6" and i+5 < len(images):
+                    element.attrib["{http://www.w3.org/1999/xlink}href"] = images[i+5]
+                elif element.attrib["id"] == "card-7" and i+6 < len(images):
+                    element.attrib["{http://www.w3.org/1999/xlink}href"] = images[i+6]
+                elif element.attrib["id"] == "card-8" and i+7 < len(images):
+                    element.attrib["{http://www.w3.org/1999/xlink}href"] = images[i+7]
+                elif element.attrib["id"] == "card-9" and i+8 < len(images):
+                    element.attrib["{http://www.w3.org/1999/xlink}href"] = images[i+8]
+
+        filename_tmp = file_name + str(i//9)
+        file_name_tmp_svg = filename_tmp + ".svg"
+        file_name_tmp_pdf = filename_tmp + ".pdf"
+        tree.write(file_name_tmp_svg)
+        subprocess.check_output(['inkscape', file_name_tmp_svg, '-o', file_name_tmp_pdf])
+        subprocess.check_output(['rm', file_name_tmp_svg])
+        files.append(file_name_tmp_pdf)
+    pdf_option = "-sOutputFile=" + file_name + ".pdf"
+    subprocess.check_output(['gs'] + ['-dBATCH'] + ['-dNOPAUSE'] + ['-q'] +['-sDEVICE=pdfwrite'] + [pdf_option] + files)
+    subprocess.check_output(['rm']  + files)
+
+def combinePaperPrints():
+    output_file = "./paper-print/outputs/all_cards.pdf"
+    subprocess.check_output(['rm'] + ['-f'] + [output_file])
+    pdf_option = "-sOutputFile=" + output_file
+    subprocess.check_output(['gs'] + ['-dBATCH'] + ['-dNOPAUSE'] + ['-q'] +['-sDEVICE=pdfwrite'] + [pdf_option] + ["./paper-print/outputs/adaptation.pdf"] + ["./paper-print/outputs/mutation.pdf"] + ["./paper-print/outputs/creature.pdf"])
