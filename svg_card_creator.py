@@ -166,9 +166,3 @@ def create_paper_print(images, file_name, outputpath):
     pdf_option = "-sOutputFile=" + file_name + ".pdf"
     subprocess.check_output(['gs'] + ['-dBATCH'] + ['-dNOPAUSE'] + ['-q'] +['-sDEVICE=pdfwrite'] + [pdf_option] + files)
     subprocess.check_output(['rm']  + files)
-
-def combinePaperPrints():
-    output_file = "./paper-print/outputs/all_cards.pdf"
-    subprocess.check_output(['rm'] + ['-f'] + [output_file])
-    pdf_option = "-sOutputFile=" + output_file
-    subprocess.check_output(['gs'] + ['-dBATCH'] + ['-dNOPAUSE'] + ['-q'] +['-sDEVICE=pdfwrite'] + [pdf_option] + ["./paper-print/outputs/adaptation.pdf"] + ["./paper-print/outputs/mutation.pdf"] + ["./paper-print/outputs/creature.pdf"])
