@@ -28,7 +28,7 @@ def full_card_creation(data_parent_dir, card_model, destination_path, get_templa
     if "-pdf" in gen_options:
         create_pdfs(list_of_cards_by_type)
     if "-paper" in gen_options:
-        creater_paper_prints(list_of_cards_by_type)
+        create_paper_prints(list_of_cards_by_type)
     
 def create_grids(list_of_cards_by_type):
     check_if_folder_exists_and_create_if_not("./tts")
@@ -40,11 +40,15 @@ def create_pdfs(list_of_cards_by_type):
     for cards_of_type in list_of_cards_by_type:
         create_pdf(list(map(lambda x: x[1], cards_of_type)), cards_of_type[0][0]["CardType"])
 
-def creater_paper_prints(list_of_cards_by_type):
+def create_paper_prints(list_of_cards_by_type):
     outputpath = "./paper-print/outputs/"
     check_if_folder_exists_and_create_if_not(outputpath)
     for cards_of_type in list_of_cards_by_type:
         create_paper_print(list(map(lambda x: x[1], cards_of_type)), cards_of_type[0][0]["CardType"], outputpath)
+    pdf_option = "-sOutputFile=" + outputpath + "all_cards.pdf"
+    paper_print_paths = list(map(lambda x: os.path.abspath(outputpath + x[0][0]["CardType"] + ".pdf"), list_of_cards_by_type))
+    print(paper_print_paths)
+    subprocess.check_output(['gs'] + ['-dBATCH'] + ['-dNOPAUSE'] + ['-q'] +['-sDEVICE=pdfwrite'] + [pdf_option] + paper_print_paths)
 
 def create_pdf(images, name):
     subprocess.check_output(['convert']  + images + ['./pdf/all-' + name + '.pdf'])
@@ -134,23 +138,23 @@ def create_paper_print(images, file_name, outputpath):
         for element in root.iter():
             if "id" in element.attrib:
                 if element.attrib["id"] == "card-1" and i < len(images):
-                    element.attrib["{http://www.w3.org/1999/xlink}href"] = images[i]
+                    element.attrib["{http://www.w3.org/1999/xlink}href"] = os.path.abspath(images[i])
                 elif element.attrib["id"] == "card-2" and i+1 < len(images):
-                    element.attrib["{http://www.w3.org/1999/xlink}href"] = images[i+1]
+                    element.attrib["{http://www.w3.org/1999/xlink}href"] = os.path.abspath(images[i+1])
                 elif element.attrib["id"] == "card-3" and i+2 < len(images):
-                    element.attrib["{http://www.w3.org/1999/xlink}href"] = images[i+2]
+                    element.attrib["{http://www.w3.org/1999/xlink}href"] = os.path.abspath(images[i+2])
                 elif element.attrib["id"] == "card-4" and i+3 < len(images):
-                    element.attrib["{http://www.w3.org/1999/xlink}href"] = images[i+3]
+                    element.attrib["{http://www.w3.org/1999/xlink}href"] = os.path.abspath(images[i+3])
                 elif element.attrib["id"] == "card-5" and i+4 < len(images):
-                    element.attrib["{http://www.w3.org/1999/xlink}href"] = images[i+4]
+                    element.attrib["{http://www.w3.org/1999/xlink}href"] = os.path.abspath(images[i+4])
                 elif element.attrib["id"] == "card-6" and i+5 < len(images):
-                    element.attrib["{http://www.w3.org/1999/xlink}href"] = images[i+5]
+                    element.attrib["{http://www.w3.org/1999/xlink}href"] = os.path.abspath(images[i+5])
                 elif element.attrib["id"] == "card-7" and i+6 < len(images):
-                    element.attrib["{http://www.w3.org/1999/xlink}href"] = images[i+6]
+                    element.attrib["{http://www.w3.org/1999/xlink}href"] = os.path.abspath(images[i+6])
                 elif element.attrib["id"] == "card-8" and i+7 < len(images):
-                    element.attrib["{http://www.w3.org/1999/xlink}href"] = images[i+7]
+                    element.attrib["{http://www.w3.org/1999/xlink}href"] = os.path.abspath(images[i+7])
                 elif element.attrib["id"] == "card-9" and i+8 < len(images):
-                    element.attrib["{http://www.w3.org/1999/xlink}href"] = images[i+8]
+                    element.attrib["{http://www.w3.org/1999/xlink}href"] = os.path.abspath(images[i+8])
 
         filename_tmp = file_name + str(i//9)
         file_name_tmp_svg = filename_tmp + ".svg"
