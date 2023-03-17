@@ -4,7 +4,6 @@ import shutil
 import xml.etree.ElementTree as ET
 import subprocess
 
-
 def get_all_yaml_files_dir_and_subdirs(dir_path):
     yaml_files_dir_and_subdirs = []
     for root, dirs, files in os.walk(dir_path):
@@ -29,7 +28,7 @@ def full_card_creation(data_parent_dir, card_model, destination_path, get_templa
         create_pdfs(list_of_cards_by_type)
     if "-paper" in gen_options:
         create_paper_prints(list_of_cards_by_type)
-    
+
 def create_grids(list_of_cards_by_type):
     check_if_folder_exists_and_create_if_not("./tts")
     for cards_of_type in list_of_cards_by_type:
@@ -52,7 +51,6 @@ def create_paper_prints(list_of_cards_by_type):
 
 def create_pdf(images, name):
     subprocess.check_output(['convert']  + images + ['./pdf/all-' + name + '.pdf'])
-
 
 def create_cards_from_yaml_files(data_parent_dir, card_model, destination_path, get_template_path_from_card):
     check_if_folder_exists_and_create_if_not(folder_path=destination_path+"/cards")
@@ -84,7 +82,7 @@ def create_card_data_and_image(card, card_model, destination_path, get_template_
         return None
     print(card["Name"] + " is being generated")
     destination_path_card_type = destination_path + "/cards/" + card["CardType"]
-    check_if_folder_exists_and_create_if_not(destination_path_card_type) 
+    check_if_folder_exists_and_create_if_not(destination_path_card_type)
 
     filename = destination_path_card_type + "/" + card["Name"]
     filenamePNG = filename + ".png"
