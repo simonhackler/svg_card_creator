@@ -10,6 +10,7 @@ def get_all_yaml_files_dir_and_subdirs(dir_path):
         for file in files:
             if file.endswith(".yaml"):
                 yaml_files_dir_and_subdirs.append(os.path.join(root, file))
+    yaml_files_dir_and_subdirs.sort()
     return yaml_files_dir_and_subdirs
 
 def full_card_creation(data_parent_dir, card_model, destination_path, get_template_path_from_card, gen_options):
